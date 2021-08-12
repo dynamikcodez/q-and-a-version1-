@@ -1,41 +1,63 @@
 import sys
-from PyQt5 import QtCore, QtWidgets, QtGui
-from collections import OrderedDict
+from PyQt5.QtCore import QSize
+from PyQt5.QtGui import QImage, QPalette, QBrush, QFont
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtWidgets import *
 import Questions
 
-# main widget
-class MyWidget(QtWidgets.QWidget):
+class MainWindow(QWidget):
     question_tracker = 0 # index of current question
     question = 0 # used to index the question of the current question 
     def __init__(self):
-        super().__init__()
+       QWidget.__init__(self)
+       self.setWindowTitle("My App")
+       self.setGeometry(100,100,1000,800)
 
-# ______Button elements_________________________________________
-        self.nextbutton = QtWidgets.QPushButton("Next")
-        self.prevbutton = QtWidgets.QPushButton("Prev")
-        self.answerbutton = QtWidgets.QPushButton("View Answer")
+       oImage = QImage("background.jpg")
 
-# ______Text elements(Labels)___________________________________
-        self.question_on_screen = QtWidgets.QLabel(
+       sImage = oImage.scaled(QSize(rect.width(),rect.height()))      
+       #sImage = oImage.scaled(QSize(1366,768))                   # resize Image to widgets size
+       palette = QPalette()
+       palette.setBrush(QPalette.Window, QBrush(sImage))                        
+       self.setPalette(palette)
+
+       self.label = QLabel('Test', self)                        # test, if it's really backgroundimage
+       self.label.setGeometry(50,50,200,50)
+
+    # ______Button elements_________________________________________
+       self.nextbutton = QtWidgets.QPushButton("Next")
+       self.prevbutton = QtWidgets.QPushButton("Prev")
+       self.answerbutton = QtWidgets.QPushButton("View Answer")
+       self.nextbutton.move(500,500)
+
+    # ______Text elements(Labels)___________________________________
+       self.question_on_screen = QtWidgets.QLabel(
             str(Questions.questions.question_list[self.question_tracker]
-            [MyWidget.question][int(MyWidget.question)]),
+            [MainWindow.question][int(MainWindow.question)]),
             alignment=QtCore.Qt.AlignCenter)
-        self.answer_on_screen = QtWidgets.QLabel("")
+       self.question_on_screen.setFont(QFont('Arial', 30))
 
-#_______Creating layout_________________________________________
-        self.layout = QtWidgets.QVBoxLayout(self)
+       self.answer_on_screen = QtWidgets.QLabel("")
+       self.answer_on_screen.setFont(QFont('Arial', 10))
 
-# ______Adding elements to layout_______________________________ 
-        self.layout.addWidget(self.question_on_screen)
-        self.layout.addWidget(self.answer_on_screen)
-        self.layout.addWidget(self.nextbutton)
-        self.layout.addWidget(self.prevbutton)
-        self.layout.addWidget(self.answerbutton)
+    #_______Creating layout_________________________________________
+       self.layout = QtWidgets.QGridLayout(self)
 
-# ______Adding functions to buttons_____________________________
-        self.nextbutton.clicked.connect(self.question_next)
-        self.prevbutton.clicked.connect(self.question_prev)
-        self.answerbutton.clicked.connect(self.view_ans)
+    # ______Adding elements to layout_______________________________ 
+       self.layout.addWidget(QtWidgets.QLabel(""),0,1)
+       self.layout.addWidget(self.question_on_screen,1,1)
+       self.layout.addWidget(self.answer_on_screen,2,1)
+       self.layout.addWidget(self.nextbutton,3,2)
+       self.layout.addWidget(self.prevbutton,3,0)
+       self.layout.addWidget(self.answerbutton,3,1)
+
+    # ______Adding functions to buttons_____________________________
+       self.nextbutton.clicked.connect(self.question_next)
+       self.prevbutton.clicked.connect(self.question_prev)
+       self.answerbutton.clicked.connect(self.view_ans)
+
+       self.nextbutton.move(500,500)
+       self.show()
 
     def question_index():
         
@@ -45,7 +67,10 @@ class MyWidget(QtWidgets.QWidget):
         """Views answer by question to index 1 """
         answer = str(Questions.questions.question_list[self.question_tracker]
         [1]) 
-        self.answer_on_screen.setText(f"Answer: {answer}")
+        question = str(Questions.questions.question_list[self.question_tracker]
+        [int(MainWindow.question)])
+        self.question_on_screen.setText(f"Question: {question}\n\nAnswer: {answer}")
+        #self.answer_on_screen.setText(f"Answer: {answer}")
 
         pass
 
@@ -53,36 +78,34 @@ class MyWidget(QtWidgets.QWidget):
     def question_next(self):
         """Adds 1 to the current questions index to change to next question"""
         question_list = Questions.questions.question_list
-        if((MyWidget.question_tracker +1 < len(question_list))):
-            self.answer_on_screen.setText("click view answer to see answer")
-            MyWidget.question_tracker +=1
+        if((MainWindow.question_tracker +1 < len(question_list))):
+            self.answer_on_screen.setText(" ")
+            MainWindow.question_tracker +=1
             question = str(Questions.questions.question_list[self.question_tracker]
-            [int(MyWidget.question)])
+            [int(MainWindow.question)])
             self.question_on_screen.setText(f"Question: {question}")
         else:
             return
 
     def question_prev(self):
         """Subtracts 1 from current question index to go to prev question"""
-        if(not(MyWidget.question_tracker-1 < 0)):
-            self.answer_on_screen.setText("click view answer to see answer")
-            MyWidget.question_tracker -=1
+        if(not(MainWindow.question_tracker-1 < 0)):
+            self.answer_on_screen.setText(" ")
+            MainWindow.question_tracker -=1
             question = str(Questions.questions.question_list[self.question_tracker]
-            [int(MyWidget.question)])
+            [int(MainWindow.question)])
             self.question_on_screen.setText(f"Question: {question}")
     
-        
+
+
+       
+
 if __name__ == "__main__":
-    app = QtWidgets.QApplication([])
 
-    widget = MyWidget()
-    widget.resize(800, 600)
-    widget.show()
-
-    sys.exit(app.exec())
-
-# Add more comments----done
-# find solution to wrongish initial question display
-# add a way to dynamically and questions and answer
-# .. .. .. .. dynamically delete questions and answers
-# maybe change some variable names.
+    app = QApplication(sys.argv)
+    screen = app.primaryScreen()
+    #print('Screen: %s' % screen.name())
+    size = screen.size()  
+    rect = screen.availableGeometry()
+    oMainwindow = MainWindow()
+    sys.exit(app.exec_())
